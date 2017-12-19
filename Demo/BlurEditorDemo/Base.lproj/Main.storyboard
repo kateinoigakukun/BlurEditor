@@ -39,15 +39,34 @@
                                     <action selector="savePhoto" destination="BYZ-38-t0r" eventType="touchUpInside" id="qfX-X1-K2d"/>
                                 </connections>
                             </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="g0J-Vp-03r">
+                                <rect key="frame" x="137" y="533" width="44" height="30"/>
+                                <state key="normal" title="Eraser"/>
+                                <connections>
+                                    <action selector="setEraserMode" destination="BYZ-38-t0r" eventType="touchUpInside" id="UiU-eW-dsR"/>
+                                </connections>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="EMI-JN-Q0h">
+                                <rect key="frame" x="207" y="533" width="30" height="30"/>
+                                <state key="normal" title="Pen"/>
+                                <connections>
+                                    <action selector="setPenMode" destination="BYZ-38-t0r" eventType="touchUpInside" id="e5S-qb-bBd"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <constraints>
+                            <constraint firstAttribute="trailing" secondItem="EMI-JN-Q0h" secondAttribute="trailing" constant="138" id="03N-Dy-yp2"/>
+                            <constraint firstItem="jDh-Bn-HPw" firstAttribute="top" secondItem="EMI-JN-Q0h" secondAttribute="bottom" constant="8" id="AR3-vL-uBM"/>
                             <constraint firstItem="Kvn-0K-HNN" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" id="Bbk-fd-h2A"/>
                             <constraint firstItem="Kvn-0K-HNN" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="Fbu-5d-vzq"/>
+                            <constraint firstItem="g0J-Vp-03r" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="137" id="Yj9-nw-CnZ"/>
                             <constraint firstItem="jDh-Bn-HPw" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="dyI-hs-7HA"/>
                             <constraint firstItem="W9r-1S-FoW" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="gp4-tX-NQO"/>
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="bottom" secondItem="jDh-Bn-HPw" secondAttribute="bottom" constant="66" id="jKk-Os-7NR"/>
                             <constraint firstItem="W9r-1S-FoW" firstAttribute="top" secondItem="jDh-Bn-HPw" secondAttribute="bottom" constant="8" id="mNC-Pj-1QP"/>
+                            <constraint firstItem="jDh-Bn-HPw" firstAttribute="top" secondItem="g0J-Vp-03r" secondAttribute="bottom" constant="8" id="yRU-Dm-b3q"/>
+                            <constraint firstItem="EMI-JN-Q0h" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="g0J-Vp-03r" secondAttribute="trailing" constant="8" symbolic="YES" id="zej-ru-ucv"/>
                         </constraints>
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
                     </view>

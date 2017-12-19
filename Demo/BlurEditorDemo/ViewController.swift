@@ -38,6 +38,14 @@ class ViewController: UIViewController {
         guard let image = blurEditorView.editedImage else { return }
         UIImageWriteToSavedPhotosAlbum(image, nil, nil, nil)
     }
+
+    @IBAction func setEraserMode() {
+        blurEditorView.mode = .erase
+    }
+    @IBAction func setPenMode() {
+        blurEditorView.mode = .pen
+    }
+
 }
 
 extension ViewController: UIImagePickerControllerDelegate, UINavigationControllerDelegate {

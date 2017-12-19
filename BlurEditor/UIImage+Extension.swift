@@ -36,4 +36,12 @@ extension UIImage {
 
         return resizedImage
     }
+
+    func union(below image: UIImage) -> UIImage? {
+        UIGraphicsBeginImageContextWithOptions(self.size, false, 0.0)
+        defer { UIGraphicsEndImageContext() }
+        draw(in: .init(origin: .zero, size: size))
+        image.draw(in: .init(origin: .zero, size: image.size))
+        return UIGraphicsGetImageFromCurrentImageContext()
+    }
 }
