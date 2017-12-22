@@ -1,0 +1,11 @@
+framework module BlurEditor {
+  umbrella header "BlurEditor.h"
+
+  export *
+  module * { export * }
+}
+
+module BlurEditor.Swift {
+    header "BlurEditor-Swift.h"
+    requires objc
+}
