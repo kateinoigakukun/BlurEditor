@@ -39,7 +39,7 @@ open class BlurEditorView: UIView {
     }
 
     open var mode: Mode = .pen {
-        willSet { currentEditingImage = commit(paths: chunkedPath) }
+        willSet { currentEditingImage = commit() }
         didSet { refreshImage() }
     }
 
@@ -119,7 +119,6 @@ open class BlurEditorView: UIView {
 
     private func refreshImage() {
         guard let originalImage = originalImage else { return }
-        chunkedPath.removeAll()
         switch mode {
         case .pen:
             underlyingImage = blurredImage
@@ -129,7 +128,7 @@ open class BlurEditorView: UIView {
     }
 
     private func captureView() -> UIImage? {
-        return commit(paths: chunkedPath).flatMap { [weak self] image -> UIImage? in
+        return commit().flatMap { [weak self] image -> UIImage? in
             return self?.blurredImage?.union(below: image)
         }
     }
@@ -146,9 +145,11 @@ open class BlurEditorView: UIView {
         topImageView.image = UIGraphicsGetImageFromCurrentImageContext()
     }
 
-    private func commit(paths: [Path]) -> UIImage? {
+    private func commit() -> UIImage? {
         guard let currentEditingImage = currentEditingImage else { return nil }
-        guard !paths.isEmpty else { return currentEditingImage }
+        guard !chunkedPath.isEmpty else { return currentEditingImage }
+        defer { chunkedPath.removeAll() }
+
         UIGraphicsBeginImageContextWithOptions(currentEditingImage.size, false, currentEditingImage.scale)
         defer { UIGraphicsEndImageContext() }
         guard let context = UIGraphicsGetCurrentContext() else { return nil }
@@ -156,7 +157,7 @@ open class BlurEditorView: UIView {
 
         let ratio = (width: currentEditingImage.size.width / frame.width, height: currentEditingImage.size.height / frame.height)
 
-        paths.forEach { path in
+        chunkedPath.forEach { path in
             let scaledFromPoint = CGPoint.init(x: path.fromPoint.x * ratio.width,
                                                y: path.fromPoint.y * ratio.height)
             let scaledToPoint = CGPoint.init(x: path.toPoint.x * ratio.width,
