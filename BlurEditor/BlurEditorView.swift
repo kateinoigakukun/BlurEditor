@@ -26,6 +26,7 @@ open class BlurEditorView: UIView {
         didSet {
             currentEditingImage = originalImage
             blurredImage = originalImage?.blurred(blurRadius: blurRadius)
+            topImageViewHeightConstraint?.constant = originalImage?.suitableSize(widthLimit: frame.size.width)?.height ?? 0.0
             refreshImage()
         }
     }
@@ -50,7 +51,9 @@ open class BlurEditorView: UIView {
 
     private let topImageView: UIImageView = .init()
     private let underlyingImageView: UIImageView = .init()
-    private var lastPoint: CGPoint?
+    private let drawingView: DrawingView = .init()
+
+    private var topImageViewHeightConstraint: NSLayoutConstraint?
     private var chunkedPath: [Path] = []
     private var currentEditingImage: UIImage? {
         didSet {
@@ -81,38 +84,57 @@ open class BlurEditorView: UIView {
 
     private func initialize() {
         underlyingImageView.frame = .init(origin: .zero, size: frame.size)
+        underlyingImageView.contentMode = .scaleAspectFit
+        underlyingImageView.translatesAutoresizingMaskIntoConstraints = false
+
         topImageView.frame = .init(origin: .zero, size: frame.size)
-        topImageView.contentMode = .scaleToFill
-        underlyingImageView.contentMode = .scaleToFill
+        topImageView.contentMode = .scaleAspectFit
+        topImageView.translatesAutoresizingMaskIntoConstraints = false
+
+        drawingView.translatesAutoresizingMaskIntoConstraints = false
+        drawingView.drawHandler = { [weak self] fromPoint, toPoint in
+            self?.drawPath(from: fromPoint, to: toPoint)
+        }
+
         addSubview(underlyingImageView)
         addSubview(topImageView)
+        addSubview(drawingView)
         bringSubview(toFront: topImageView)
-    }
+        bringSubview(toFront: drawingView)
 
-    // MARK: - override
+        let viewTopConstraint = NSLayoutConstraint.init(
+            item: topImageView, attribute: .top,
+            relatedBy: .equal, toItem: self, attribute: .top,
+            multiplier: 1.0, constant: 0.0)
+        viewTopConstraint.priority = .defaultHigh
+        let viewBottomConstraint = NSLayoutConstraint.init(
+            item: topImageView, attribute: .bottom,
+            relatedBy: .equal, toItem: self, attribute: .bottom,
+            multiplier: 1.0, constant: 0.0)
+        viewBottomConstraint.priority = .defaultHigh
 
-    open override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        guard let point = touches.first?.location(in: self) else { return }
-        if lastPoint == nil {
-            lastPoint = point
-        }
-    }
+        let imageViewHeightConstraint = topImageView.heightAnchor.constraint(equalToConstant: 0)
+        topImageViewHeightConstraint = imageViewHeightConstraint
 
-    open override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
-        super.touchesMoved(touches, with: event)
+        let constraints = [
+            topImageView.heightAnchor.constraint(equalTo: underlyingImageView.heightAnchor),
+            topImageView.widthAnchor.constraint(equalTo: underlyingImageView.widthAnchor),
+            topImageView.centerXAnchor.constraint(equalTo: underlyingImageView.centerXAnchor),
+            topImageView.centerYAnchor.constraint(equalTo: underlyingImageView.centerYAnchor),
 
-        guard let point = touches.first?.location(in: self) else { return }
-        defer { lastPoint = point }
-        guard let lastPoint = lastPoint else { return }
+            topImageView.leadingAnchor.constraint(equalTo: leadingAnchor),
+            topImageView.trailingAnchor.constraint(equalTo: trailingAnchor),
+            topImageView.centerXAnchor.constraint(equalTo: centerXAnchor),
+            topImageView.centerYAnchor.constraint(equalTo: centerYAnchor),
 
-        drawPath(from: lastPoint, to: point)
-    }
+            drawingView.centerXAnchor.constraint(equalTo: topImageView.centerXAnchor),
+            drawingView.centerYAnchor.constraint(equalTo: topImageView.centerYAnchor),
+            drawingView.widthAnchor.constraint(equalTo: topImageView.widthAnchor),
+            drawingView.heightAnchor.constraint(equalTo: topImageView.heightAnchor),
+            viewTopConstraint, viewBottomConstraint, imageViewHeightConstraint
+            ]
 
-    open override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
-        super.touchesEnded(touches, with: event)
-
-        guard let _ = lastPoint else { return }
-        lastPoint = nil
+        NSLayoutConstraint.activate(constraints)
     }
 
     // MARK: - private mathods
@@ -128,16 +150,17 @@ open class BlurEditorView: UIView {
     }
 
     private func captureView() -> UIImage? {
-        return commit().flatMap { [weak self] image -> UIImage? in
+        currentEditingImage = commit()
+        return currentEditingImage.flatMap { [weak self] image -> UIImage? in
             return self?.blurredImage?.union(below: image)
         }
     }
 
     private func drawPath(from fromPoint: CGPoint, to toPoint: CGPoint) {
-        UIGraphicsBeginImageContextWithOptions(frame.size, false, 0.0)
+        UIGraphicsBeginImageContextWithOptions(topImageView.frame.size, false, 0.0)
         defer { UIGraphicsEndImageContext() }
         guard let context = UIGraphicsGetCurrentContext() else { return }
-        topImageView.image?.draw(in: .init(origin: .zero, size: frame.size))
+        topImageView.image?.draw(in: .init(origin: .zero, size: topImageView.frame.size))
         let path = Path.init(fromPoint: fromPoint, toPoint: toPoint)
         chunkedPath.append(path)
         addStrokePath(context, from: fromPoint, to: toPoint)
@@ -155,7 +178,7 @@ open class BlurEditorView: UIView {
         guard let context = UIGraphicsGetCurrentContext() else { return nil }
         currentEditingImage.draw(in: .init(origin: .zero, size: currentEditingImage.size))
 
-        let ratio = (width: currentEditingImage.size.width / frame.width, height: currentEditingImage.size.height / frame.height)
+        let ratio = (width: currentEditingImage.size.width / topImageView.frame.width, height: currentEditingImage.size.height / topImageView.frame.height)
 
         chunkedPath.forEach { path in
             let scaledFromPoint = CGPoint.init(x: path.fromPoint.x * ratio.width,
@@ -187,3 +210,36 @@ open class BlurEditorView: UIView {
     }
 }
 
+
+class DrawingView: UIView {
+
+    private var lastPoint: CGPoint?
+    fileprivate var drawHandler: ((_ fromPoint: CGPoint, _ toPoint: CGPoint) -> Void)?
+
+    // MARK: - override
+
+    open override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        guard let point = touches.first?.location(in: self) else { return }
+        if lastPoint == nil {
+            lastPoint = point
+        }
+    }
+
+    open override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
+        super.touchesMoved(touches, with: event)
+
+        guard let point = touches.first?.location(in: self) else { return }
+        defer { lastPoint = point }
+        guard let lastPoint = lastPoint else { return }
+
+        drawHandler?(lastPoint, point)
+    }
+
+    open override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
+        super.touchesEnded(touches, with: event)
+
+        guard let _ = lastPoint else { return }
+        lastPoint = nil
+    }
+
+}
