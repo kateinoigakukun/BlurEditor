@@ -2,7 +2,7 @@
 
 `BlurEditor` provides image editor for drawing blur effects.
 
-![dmeo.gif](./assets/dmeo.gif)
+![dmeo.gif](./assets/demo.gif)
 
 
 ## Features
@@ -12,11 +12,20 @@
 - [x] Export canvas
 
 
+## Requirements
+
+- iOS9.0 or later
+- Swift 4.0 or later
+
 ## Installation
 
 ### Cocoapods
 
 ### Carthage
+
+```
+github "kateinoigakukun/BlurEditor"
+```
 
 ## Implementaion
 
