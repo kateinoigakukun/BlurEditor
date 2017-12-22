@@ -104,15 +104,6 @@ open class BlurEditorView: UIView {
         initialize()
     }
 
-    // MARK: - public methods
-
-    public func exportCanvas() -> UIImage? {
-        commit()
-        return currentEditingImage.flatMap { [weak self] image -> UIImage? in
-            return self?.blurredImage?.union(below: image)
-        }
-    }
-
     private func initialize() {
         underlyingImageView.frame = .init(origin: .zero, size: frame.size)
         underlyingImageView.contentMode = .scaleAspectFit
@@ -167,6 +158,15 @@ open class BlurEditorView: UIView {
             ]
 
         NSLayoutConstraint.activate(constraints)
+    }
+
+    // MARK: - public methods
+
+    public func exportCanvas() -> UIImage? {
+        commit()
+        return currentEditingImage.flatMap { [weak self] image -> UIImage? in
+            return self?.blurredImage?.union(below: image)
+        }
     }
 
     // MARK: - private mathods
