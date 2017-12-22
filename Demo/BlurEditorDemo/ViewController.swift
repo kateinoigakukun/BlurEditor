@@ -12,7 +12,7 @@ class ViewController: UIViewController {
 
     @IBOutlet weak var blurEditorView: BlurEditorView! {
         didSet {
-            blurEditorView.blurRadius = 100.0
+            blurEditorView.blurRadius = 30.0
         }
     }
 
@@ -35,7 +35,7 @@ class ViewController: UIViewController {
     }
 
     @IBAction func savePhoto() {
-        guard let image = blurEditorView.editedImage else { return }
+        guard let image = blurEditorView.exportCanvas() else { return }
         UIImageWriteToSavedPhotosAlbum(image, nil, nil, nil)
     }
 

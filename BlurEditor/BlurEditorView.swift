@@ -20,6 +20,40 @@ open class BlurEditorView: UIView {
         case pen
     }
 
+    private class DrawingView: UIView {
+
+        private var lastPoint: CGPoint?
+        fileprivate var drawHandler: ((_ fromPoint: CGPoint, _ toPoint: CGPoint) -> Void)?
+
+        // MARK: - override
+
+        open override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+            guard let point = touches.first?.location(in: self) else { return }
+            if lastPoint == nil {
+                lastPoint = point
+            }
+        }
+
+        open override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
+            super.touchesMoved(touches, with: event)
+
+            guard let point = touches.first?.location(in: self) else { return }
+            defer { lastPoint = point }
+            guard let lastPoint = lastPoint else { return }
+
+            drawHandler?(lastPoint, point)
+        }
+
+        open override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
+            super.touchesEnded(touches, with: event)
+
+            guard let _ = lastPoint else { return }
+            lastPoint = nil
+        }
+
+    }
+
+
     // MARK: - open properties
 
     open var originalImage: UIImage? {
@@ -31,16 +65,12 @@ open class BlurEditorView: UIView {
         }
     }
 
-    open var editedImage: UIImage? {
-        return captureView()
-    }
-
     open var blurRadius: CGFloat = 20.0 {
         didSet { refreshImage() }
     }
 
     open var mode: Mode = .pen {
-        willSet { currentEditingImage = commit() }
+        willSet { commit() }
         didSet { refreshImage() }
     }
 
@@ -56,17 +86,9 @@ open class BlurEditorView: UIView {
     private var topImageViewHeightConstraint: NSLayoutConstraint?
     private var chunkedPath: [Path] = []
     private var currentEditingImage: UIImage? {
-        didSet {
-            topImageView.image = currentEditingImage
-        }
+        didSet { topImageView.image = currentEditingImage }
     }
     private var blurredImage: UIImage?
-
-    private var underlyingImage: UIImage? {
-        didSet {
-            underlyingImageView.image = underlyingImage
-        }
-    }
 
     // MARK: - initializers
 
@@ -80,6 +102,15 @@ open class BlurEditorView: UIView {
         super.init(coder: aDecoder)
 
         initialize()
+    }
+
+    // MARK: - public methods
+
+    public func exportCanvas() -> UIImage? {
+        commit()
+        return currentEditingImage.flatMap { [weak self] image -> UIImage? in
+            return self?.blurredImage?.union(below: image)
+        }
     }
 
     private func initialize() {
@@ -107,6 +138,7 @@ open class BlurEditorView: UIView {
             relatedBy: .equal, toItem: self, attribute: .top,
             multiplier: 1.0, constant: 0.0)
         viewTopConstraint.priority = .defaultHigh
+
         let viewBottomConstraint = NSLayoutConstraint.init(
             item: topImageView, attribute: .bottom,
             relatedBy: .equal, toItem: self, attribute: .bottom,
@@ -143,14 +175,14 @@ open class BlurEditorView: UIView {
         guard let originalImage = originalImage else { return }
         switch mode {
         case .pen:
-            underlyingImage = blurredImage
+            underlyingImageView.image = blurredImage
         case .erase:
-            underlyingImage = originalImage
+            underlyingImageView.image = originalImage
         }
     }
 
     private func captureView() -> UIImage? {
-        currentEditingImage = commit()
+        commit()
         return currentEditingImage.flatMap { [weak self] image -> UIImage? in
             return self?.blurredImage?.union(below: image)
         }
@@ -168,14 +200,14 @@ open class BlurEditorView: UIView {
         topImageView.image = UIGraphicsGetImageFromCurrentImageContext()
     }
 
-    private func commit() -> UIImage? {
-        guard let currentEditingImage = currentEditingImage else { return nil }
-        guard !chunkedPath.isEmpty else { return currentEditingImage }
+    private func commit() {
+        guard let currentEditingImage = currentEditingImage else { return }
+        guard !chunkedPath.isEmpty else { return }
         defer { chunkedPath.removeAll() }
 
         UIGraphicsBeginImageContextWithOptions(currentEditingImage.size, false, currentEditingImage.scale)
         defer { UIGraphicsEndImageContext() }
-        guard let context = UIGraphicsGetCurrentContext() else { return nil }
+        guard let context = UIGraphicsGetCurrentContext() else { return }
         currentEditingImage.draw(in: .init(origin: .zero, size: currentEditingImage.size))
 
         let ratio = (width: currentEditingImage.size.width / topImageView.frame.width, height: currentEditingImage.size.height / topImageView.frame.height)
@@ -193,9 +225,9 @@ open class BlurEditorView: UIView {
 
         switch mode {
         case .erase:
-            return image.flatMap { originalImage?.union(below: $0) }
+            self.currentEditingImage = image.flatMap { originalImage?.union(below: $0) }
         case .pen:
-            return image.flatMap { blurredImage?.union(below: $0) }
+            self.currentEditingImage = image.flatMap { blurredImage?.union(below: $0) }
         }
     }
 
@@ -210,36 +242,3 @@ open class BlurEditorView: UIView {
     }
 }
 
-
-class DrawingView: UIView {
-
-    private var lastPoint: CGPoint?
-    fileprivate var drawHandler: ((_ fromPoint: CGPoint, _ toPoint: CGPoint) -> Void)?
-
-    // MARK: - override
-
-    open override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        guard let point = touches.first?.location(in: self) else { return }
-        if lastPoint == nil {
-            lastPoint = point
-        }
-    }
-
-    open override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
-        super.touchesMoved(touches, with: event)
-
-        guard let point = touches.first?.location(in: self) else { return }
-        defer { lastPoint = point }
-        guard let lastPoint = lastPoint else { return }
-
-        drawHandler?(lastPoint, point)
-    }
-
-    open override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
-        super.touchesEnded(touches, with: event)
-
-        guard let _ = lastPoint else { return }
-        lastPoint = nil
-    }
-
-}
