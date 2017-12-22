@@ -1,7 +1,7 @@
 Pod::Spec.new do |s|
 
   s.name         = "BlurEditor"
-  s.version      = "1.0.0"
+  s.version      = "1.0.1"
   s.summary      = "This provides image editor for drawing blur effects."
 
   s.description  = <<-DESC
@@ -11,7 +11,7 @@ Pod::Spec.new do |s|
                    DESC
 
   s.homepage     = "https://github.com/kateinoigakukun/BlurEditor"
-  s.screenshots  = "https://github.com/kateinoigakukun/BlurEditor/raw/v1.0.0/assets/demo.gif"
+  s.screenshots  = "https://github.com/kateinoigakukun/BlurEditor/raw/v1.0.1/assets/demo.gif"
 
   s.license      = "MIT"
 
