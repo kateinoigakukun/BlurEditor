@@ -12,7 +12,7 @@ class ViewController: UIViewController {
 
     @IBOutlet weak var blurEditorView: BlurEditorView! {
         didSet {
-            blurEditorView.blurRadius = 30.0
+            blurEditorView.blurRadius = 50.0
         }
     }
 
