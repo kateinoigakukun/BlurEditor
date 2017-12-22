@@ -43,7 +43,7 @@ extension CGImage {
         let source = CFDataGetBytePtr(providerData)
         memcpy(inBuffer.data, source, bytes)
 
-        for _ in 0..<4 {
+        for _ in 0..<3 {
             vImageBoxConvolve_ARGB8888(&inBuffer, &outBuffer, tempData, 0, 0, radius, radius, nil, vImage_Flags(kvImageEdgeExtend))
             swap(&inBuffer, &outBuffer)
         }

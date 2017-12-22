@@ -52,14 +52,13 @@ open class BlurEditorView: UIView {
     private let underlyingImageView: UIImageView = .init()
     private var lastPoint: CGPoint?
     private var chunkedPath: [Path] = []
-    private var currentEditingImage: UIImage?
-    private var blurredImage: UIImage?
-
-    private var topImage: UIImage? {
+    private var currentEditingImage: UIImage? {
         didSet {
-            topImageView.image = topImage
+            topImageView.image = currentEditingImage
         }
     }
+    private var blurredImage: UIImage?
+
     private var underlyingImage: UIImage? {
         didSet {
             underlyingImageView.image = underlyingImage
@@ -123,10 +122,8 @@ open class BlurEditorView: UIView {
         chunkedPath.removeAll()
         switch mode {
         case .pen:
-            topImage = currentEditingImage?.resized(max: max(frame.width, frame.height))
             underlyingImage = blurredImage
         case .erase:
-            topImage = currentEditingImage?.resized(max: max(frame.width, frame.height))
             underlyingImage = originalImage
         }
     }
@@ -141,12 +138,12 @@ open class BlurEditorView: UIView {
         UIGraphicsBeginImageContextWithOptions(frame.size, false, 0.0)
         defer { UIGraphicsEndImageContext() }
         guard let context = UIGraphicsGetCurrentContext() else { return }
-        topImage?.draw(in: .init(origin: .zero, size: frame.size))
+        topImageView.image?.draw(in: .init(origin: .zero, size: frame.size))
         let path = Path.init(fromPoint: fromPoint, toPoint: toPoint)
         chunkedPath.append(path)
         addStrokePath(context, from: fromPoint, to: toPoint)
 
-        topImage = UIGraphicsGetImageFromCurrentImageContext()
+        topImageView.image = UIGraphicsGetImageFromCurrentImageContext()
     }
 
     private func commit(paths: [Path]) -> UIImage? {
