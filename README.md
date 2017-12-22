@@ -21,6 +21,10 @@
 
 ### Cocoapods
 
+```
+pod 'BlurEditor', :git => 'https://github.com/kateinoigakukun/BlurEditor.git'
+```
+
 ### Carthage
 
 ```
