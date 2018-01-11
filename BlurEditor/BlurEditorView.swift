@@ -124,21 +124,6 @@ open class BlurEditorView: UIView {
         bringSubview(toFront: topImageView)
         bringSubview(toFront: drawingView)
 
-//        let viewTopConstraint = NSLayoutConstraint.init(
-//            item: topImageView, attribute: .top,
-//            relatedBy: .equal, toItem: self, attribute: .top,
-//            multiplier: 1.0, constant: 0.0)
-//        viewTopConstraint.priority = .defaultHigh
-//
-//        let viewBottomConstraint = NSLayoutConstraint.init(
-//            item: topImageView, attribute: .bottom,
-//            relatedBy: .equal, toItem: self, attribute: .bottom,
-//            multiplier: 1.0, constant: 0.0)
-//        viewBottomConstraint.priority = .defaultHigh
-
-        let viewTopConstraint = topAnchor.constraint(equalTo: topImageView.topAnchor)
-        let viewBottomConstraint = bottomAnchor.constraint(equalTo: topImageView.bottomAnchor)
-
         let imageViewHeightConstraint = topImageView.heightAnchor.constraint(equalToConstant: 0)
         topImageViewHeightConstraint = imageViewHeightConstraint
 
@@ -157,7 +142,9 @@ open class BlurEditorView: UIView {
             drawingView.centerYAnchor.constraint(equalTo: topImageView.centerYAnchor),
             drawingView.widthAnchor.constraint(equalTo: topImageView.widthAnchor),
             drawingView.heightAnchor.constraint(equalTo: topImageView.heightAnchor),
-            viewTopConstraint, viewBottomConstraint, imageViewHeightConstraint
+            topAnchor.constraint(equalTo: topImageView.topAnchor),
+            bottomAnchor.constraint(equalTo: topImageView.bottomAnchor),
+            imageViewHeightConstraint
             ]
 
         NSLayoutConstraint.activate(constraints)
