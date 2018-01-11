@@ -124,17 +124,20 @@ open class BlurEditorView: UIView {
         bringSubview(toFront: topImageView)
         bringSubview(toFront: drawingView)
 
-        let viewTopConstraint = NSLayoutConstraint.init(
-            item: topImageView, attribute: .top,
-            relatedBy: .equal, toItem: self, attribute: .top,
-            multiplier: 1.0, constant: 0.0)
-        viewTopConstraint.priority = .defaultHigh
+//        let viewTopConstraint = NSLayoutConstraint.init(
+//            item: topImageView, attribute: .top,
+//            relatedBy: .equal, toItem: self, attribute: .top,
+//            multiplier: 1.0, constant: 0.0)
+//        viewTopConstraint.priority = .defaultHigh
+//
+//        let viewBottomConstraint = NSLayoutConstraint.init(
+//            item: topImageView, attribute: .bottom,
+//            relatedBy: .equal, toItem: self, attribute: .bottom,
+//            multiplier: 1.0, constant: 0.0)
+//        viewBottomConstraint.priority = .defaultHigh
 
-        let viewBottomConstraint = NSLayoutConstraint.init(
-            item: topImageView, attribute: .bottom,
-            relatedBy: .equal, toItem: self, attribute: .bottom,
-            multiplier: 1.0, constant: 0.0)
-        viewBottomConstraint.priority = .defaultHigh
+        let viewTopConstraint = topAnchor.constraint(equalTo: topImageView.topAnchor)
+        let viewBottomConstraint = bottomAnchor.constraint(equalTo: topImageView.bottomAnchor)
 
         let imageViewHeightConstraint = topImageView.heightAnchor.constraint(equalToConstant: 0)
         topImageViewHeightConstraint = imageViewHeightConstraint
@@ -178,13 +181,6 @@ open class BlurEditorView: UIView {
             underlyingImageView.image = blurredImage
         case .erase:
             underlyingImageView.image = originalImage
-        }
-    }
-
-    private func captureView() -> UIImage? {
-        commit()
-        return currentEditingImage.flatMap { [weak self] image -> UIImage? in
-            return self?.blurredImage?.union(below: image)
         }
     }
 

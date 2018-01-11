@@ -17,12 +17,12 @@
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Kvn-0K-HNN" customClass="BlurEditorView" customModule="BlurEditorDemo" customModuleProvider="target">
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Kvn-0K-HNN" customClass="BlurEditorView" customModule="BlurEditor">
                                 <rect key="frame" x="17.5" y="20" width="340" height="500"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="340" id="0qP-xO-EX6"/>
-                                    <constraint firstAttribute="height" constant="500" id="YRg-T4-nPa"/>
+                                    <constraint firstAttribute="height" priority="750" constant="500" id="YRg-T4-nPa"/>
                                 </constraints>
                             </view>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="jDh-Bn-HPw">
