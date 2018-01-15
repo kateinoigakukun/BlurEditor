@@ -7,13 +7,14 @@
 //
 
 import UIKit
-import BlurEditor
+//import BlurEditor
 
 class ViewController: UIViewController {
 
     @IBOutlet weak var blurEditorView: BlurEditorView! {
         didSet {
-            blurEditorView.blurRadius = 50.0
+//            blurEditorView.blurRadius = 50.0
+            blurEditorView.lineColor = .black
         }
     }
 

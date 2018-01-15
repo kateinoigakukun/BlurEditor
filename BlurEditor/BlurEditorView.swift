@@ -58,10 +58,23 @@ open class BlurEditorView: UIView {
 
     open var originalImage: UIImage? {
         didSet {
+            defer { refreshImage() }
             currentEditingImage = originalImage
-            blurredImage = originalImage?.blurred(blurRadius: blurRadius)
-            topImageViewHeightConstraint?.constant = originalImage?.suitableSize(widthLimit: frame.size.width)?.height ?? 0.0
-            refreshImage()
+            if let lineColor = self.lineColor, let imageSize = originalImage?.size {
+                blurredImage = UIImage.filled(with: lineColor, size: imageSize)
+            } else {
+                blurredImage = originalImage?.blurred(blurRadius: blurRadius)
+            }
+            guard let originalImage = self.originalImage else { return }
+            let suitableSize: CGSize? = {
+                if originalImage.size.height > originalImage.size.width {
+                    return originalImage.suitableSize(heightLimit: self.frame.height)
+                } else {
+                    return originalImage.suitableSize(widthLimit: self.frame.width)
+                }
+            }()
+            topImageViewWidthConstraint?.constant = suitableSize?.width ?? 0
+            topImageViewHeightConstraint?.constant = suitableSize?.height ?? 0
         }
     }
 
@@ -76,13 +89,16 @@ open class BlurEditorView: UIView {
 
     open var lineWidth: CGFloat = 20.0
     open var lineCap: CGLineCap = .round
+    open var lineColor: UIColor?
 
     // MARK: - private properties
 
+    private let canvasGroupView: UIView = .init()
     private let topImageView: UIImageView = .init()
     private let underlyingImageView: UIImageView = .init()
     private let drawingView: DrawingView = .init()
 
+    private var topImageViewWidthConstraint: NSLayoutConstraint?
     private var topImageViewHeightConstraint: NSLayoutConstraint?
     private var chunkedPath: [Path] = []
     private var currentEditingImage: UIImage? {
@@ -118,34 +134,40 @@ open class BlurEditorView: UIView {
             self?.drawPath(from: fromPoint, to: toPoint)
         }
 
-        addSubview(underlyingImageView)
-        addSubview(topImageView)
-        addSubview(drawingView)
-        bringSubview(toFront: topImageView)
-        bringSubview(toFront: drawingView)
+        canvasGroupView.translatesAutoresizingMaskIntoConstraints = false
 
-        let imageViewHeightConstraint = topImageView.heightAnchor.constraint(equalToConstant: 0)
+        canvasGroupView.addSubview(underlyingImageView)
+        canvasGroupView.addSubview(topImageView)
+        canvasGroupView.addSubview(drawingView)
+        canvasGroupView.bringSubview(toFront: topImageView)
+        canvasGroupView.bringSubview(toFront: drawingView)
+        addSubview(canvasGroupView)
+
+        let imageViewWidthConstraint = canvasGroupView.widthAnchor.constraint(equalToConstant: frame.width)
+        let imageViewHeightConstraint = canvasGroupView.heightAnchor.constraint(equalToConstant: frame.height)
+        topImageViewWidthConstraint = imageViewWidthConstraint
         topImageViewHeightConstraint = imageViewHeightConstraint
 
         let constraints = [
-            topImageView.heightAnchor.constraint(equalTo: underlyingImageView.heightAnchor),
-            topImageView.widthAnchor.constraint(equalTo: underlyingImageView.widthAnchor),
-            topImageView.centerXAnchor.constraint(equalTo: underlyingImageView.centerXAnchor),
-            topImageView.centerYAnchor.constraint(equalTo: underlyingImageView.centerYAnchor),
+            underlyingImageView.heightAnchor.constraint(equalTo:  canvasGroupView.heightAnchor),
+            underlyingImageView.widthAnchor.constraint(equalTo:   canvasGroupView.widthAnchor),
+            underlyingImageView.centerXAnchor.constraint(equalTo: canvasGroupView.centerXAnchor),
+            underlyingImageView.centerYAnchor.constraint(equalTo: canvasGroupView.centerYAnchor),
 
-            topImageView.leadingAnchor.constraint(equalTo: leadingAnchor),
-            topImageView.trailingAnchor.constraint(equalTo: trailingAnchor),
-            topImageView.centerXAnchor.constraint(equalTo: centerXAnchor),
-            topImageView.centerYAnchor.constraint(equalTo: centerYAnchor),
+            topImageView.widthAnchor.constraint(equalTo:    canvasGroupView.widthAnchor),
+            topImageView.heightAnchor.constraint(equalTo:   canvasGroupView.heightAnchor),
+            topImageView.centerXAnchor.constraint(equalTo:  canvasGroupView.centerXAnchor),
+            topImageView.centerYAnchor.constraint(equalTo:  canvasGroupView.centerYAnchor),
 
-            drawingView.centerXAnchor.constraint(equalTo: topImageView.centerXAnchor),
-            drawingView.centerYAnchor.constraint(equalTo: topImageView.centerYAnchor),
-            drawingView.widthAnchor.constraint(equalTo: topImageView.widthAnchor),
-            drawingView.heightAnchor.constraint(equalTo: topImageView.heightAnchor),
-            topAnchor.constraint(equalTo: topImageView.topAnchor),
-            bottomAnchor.constraint(equalTo: topImageView.bottomAnchor),
-            imageViewHeightConstraint
-            ]
+            drawingView.centerXAnchor.constraint(equalTo: canvasGroupView.centerXAnchor),
+            drawingView.centerYAnchor.constraint(equalTo: canvasGroupView.centerYAnchor),
+            drawingView.widthAnchor.constraint(equalTo:   canvasGroupView.widthAnchor),
+            drawingView.heightAnchor.constraint(equalTo:  canvasGroupView.heightAnchor),
+
+            canvasGroupView.centerXAnchor.constraint(equalTo: centerXAnchor),
+            canvasGroupView.centerYAnchor.constraint(equalTo: centerYAnchor),
+            imageViewWidthConstraint, imageViewHeightConstraint,
+        ]
 
         NSLayoutConstraint.activate(constraints)
     }
