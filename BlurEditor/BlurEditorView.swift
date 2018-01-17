@@ -16,7 +16,7 @@ open class BlurEditorView: UIView {
     }
 
     public enum Mode {
-        case erase
+        case eraser
         case pen
     }
 
@@ -188,7 +188,7 @@ open class BlurEditorView: UIView {
         switch mode {
         case .pen:
             underlyingImageView.image = blurredImage
-        case .erase:
+        case .eraser:
             underlyingImageView.image = originalImage
         }
     }
@@ -229,7 +229,7 @@ open class BlurEditorView: UIView {
         let image = UIGraphicsGetImageFromCurrentImageContext()
 
         switch mode {
-        case .erase:
+        case .eraser:
             self.currentEditingImage = image.flatMap { originalImage?.union(below: $0) }
         case .pen:
             self.currentEditingImage = image.flatMap { blurredImage?.union(below: $0) }
