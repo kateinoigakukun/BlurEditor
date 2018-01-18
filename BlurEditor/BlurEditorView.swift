@@ -20,6 +20,11 @@ open class BlurEditorView: UIView {
         case pen
     }
 
+    public enum LineType {
+        case color(lineColor: UIColor)
+        case blur(blurRadius: CGFloat)
+    }
+
     private class DrawingView: UIView {
 
         private var lastPoint: CGPoint?
@@ -60,9 +65,11 @@ open class BlurEditorView: UIView {
         didSet {
             defer { refreshImage() }
             currentEditingImage = originalImage
-            if let lineColor = self.lineColor, let imageSize = originalImage?.size {
+            switch lineType {
+            case .color(let lineColor):
+                guard let imageSize = originalImage?.size else { return }
                 blurredImage = UIImage.filled(with: lineColor, size: imageSize)
-            } else {
+            case .blur(let blurRadius):
                 blurredImage = originalImage?.blurred(blurRadius: blurRadius)
             }
             guard let originalImage = self.originalImage else { return }
@@ -78,10 +85,6 @@ open class BlurEditorView: UIView {
         }
     }
 
-    open var blurRadius: CGFloat = 20.0 {
-        didSet { refreshImage() }
-    }
-
     open var mode: Mode = .pen {
         willSet { commit() }
         didSet { refreshImage() }
@@ -89,7 +92,7 @@ open class BlurEditorView: UIView {
 
     open var lineWidth: CGFloat = 20.0
     open var lineCap: CGLineCap = .round
-    open var lineColor: UIColor?
+    open var lineType: LineType = .blur(blurRadius: 20.0)
 
     // MARK: - private properties
 
