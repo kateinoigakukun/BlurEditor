@@ -197,10 +197,13 @@ open class BlurEditorView: UIView {
     }
 
     private func drawPath(from fromPoint: CGPoint, to toPoint: CGPoint) {
-        UIGraphicsBeginImageContextWithOptions(topImageView.frame.size, false, 0.0)
+        let imageSize = CGSize.init(
+            width: floor(topImageView.frame.size.width) ,
+            height: floor(topImageView.frame.size.height))
+        UIGraphicsBeginImageContextWithOptions(imageSize, false, 0.0)
         defer { UIGraphicsEndImageContext() }
         guard let context = UIGraphicsGetCurrentContext() else { return }
-        topImageView.image?.draw(in: .init(origin: .zero, size: topImageView.frame.size))
+        topImageView.image?.draw(in: .init(origin: .zero, size: imageSize))
         let path = Path.init(fromPoint: fromPoint, toPoint: toPoint)
         chunkedPath.append(path)
         addStrokePath(context, from: fromPoint, to: toPoint)

@@ -13,8 +13,7 @@ class ViewController: UIViewController {
 
     @IBOutlet weak var blurEditorView: BlurEditorView! {
         didSet {
-//            blurEditorView.blurRadius = 50.0
-            blurEditorView.lineColor = .black
+            blurEditorView.lineType = .blur(blurRadius: 50)
         }
     }
 
@@ -42,7 +41,7 @@ class ViewController: UIViewController {
     }
 
     @IBAction func setEraserMode() {
-        blurEditorView.mode = .erase
+        blurEditorView.mode = .eraser
     }
     @IBAction func setPenMode() {
         blurEditorView.mode = .pen
